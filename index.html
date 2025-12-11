@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Archive 26</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        /* Global Setup */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Press Start 2P', cursive;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        /* Video Background */
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        /* Frame Layout */
+        .frame-wrapper {
+            width: 514px;
+            height: 486px;
+            position: relative;
+        }
+
+        .retro-frame-img {
+            width: 110%;
+            height: 110%;
+            display: block;
+            image-rendering: pixelated; 
+            position: relative;
+            left: -5%;
+            top: -5%;
+        }
+
+        /* Content Styling */
+        .frame-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 50px 15px 130px 120px; 
+            background-color: #000; 
+            background-clip: content-box; 
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 25px;
+        }
+
+        .profile-pic {
+            width: 130px;
+            height: 130px;
+            object-fit: cover;
+            border: 2px solid #fff;
+            box-shadow: 4px 4px 0px #000;
+            position: relative;
+            top: -5px; 
+        }
+
+        .text-area {
+            flex: 1;
+            font-size: 12px;
+            line-height: 1.8;
+            text-shadow: 2px 2px 0px #000;
+            padding-right: 10px; 
+        }
+
+        h1 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #00ff00;
+        }
+
+        /* Animations */
+        .blink-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background-color: #ffffff;
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Audio Player Styling */
+        .audio-player {
+            margin-top: 15px;
+            border-top: 2px dashed #444;
+            padding-top: 10px;
+        }
+
+        .song-title {
+            font-size: 10px;
+            color: #00ff00;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            background: transparent;
+            border: 1px solid #fff;
+            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .btn:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .btn:active {
+            background: #00ff00;
+            border-color: #00ff00;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="video-container">
+        <video autoplay muted loop playsinline>
+            <source src="assets/backgroundvid.mp4" type="video/mp4">  <!-- optional video background -->
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+
+    <div class="frame-wrapper" id="main-frame">
+        <img src="assets/frame.png" alt="UI Frame" class="retro-frame-img">
+        
+        <div class="frame-content">
+            <img src="assets/pfp2.jpeg" alt="pfp" class="profile-pic"> <!-- picture goes here -->
+            
+            <div class="text-area">
+                <h1>YUME!</h1> <!-- custom name will go here -->
+                <p>Status: Online</p> <!--- text area 1 -->
+                <p>Loc: Manchester</p> <!-- text area 2 -->
+                <br>
+                <p>> Welcome to archive 26.</p> <!-- text area 3-->
+                <p>> You found me...<span class="blink-cursor"></span></p> <!-- text area 4 -->
+
+                <div class="audio-player"> <!-- audio player section -->
+                    <div class="song-title" id="track-name">Track: Loading...</div> 
+                    <div class="controls">
+                        <button class="btn" onclick="prevSong()">&#60;&#60;</button>
+                        <button class="btn" onclick="togglePlay()" id="play-btn">PLAY</button>
+                        <button class="btn" onclick="nextSong()">&#62;&#62;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* Responsive Scaler */
+        function resizeFrame() {
+            const wrapper = document.getElementById('main-frame');
+            
+            const baseWidth = 514;
+            const baseHeight = 486;
+            const padding = 30; 
+
+            const availableWidth = window.innerWidth - padding;
+            const availableHeight = window.innerHeight - padding;
+
+            const scaleX = availableWidth / baseWidth;
+            const scaleY = availableHeight / baseHeight;
+
+            let scaleFactor = Math.min(scaleX, scaleY);
+
+            if (scaleFactor > 1) {
+                scaleFactor = 1;
+            }
+
+            wrapper.style.zoom = scaleFactor;
+            wrapper.style.opacity = '1';
+        }
+
+        document.getElementById('main-frame').style.opacity = '0';
+        document.getElementById('main-frame').style.transition = 'opacity 0.2s ease-in';
+
+        window.addEventListener('load', resizeFrame);
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(resizeFrame, 100);
+        });
+        window.addEventListener('orientationchange', () => {
+             setTimeout(resizeFrame, 200);
+        });
+
+
+        /* Audio Player Logic */
+        const songs = [
+            { title: "Shogun - Yume", src: "assets/song1.mp3" },
+            { title: "Dark Matter - Yume (UNRELEASED).mp3", src: "assets/song2.mp3" },
+            { title: "Shimmer - Yume", src: "assets/song3.mp3" }
+        ];
+
+        let currentIdx = 0;
+        let isPlaying = false;
+        let audio = songs.length > 0 ? new Audio(songs[currentIdx].src) : null;
+        
+        const trackName = document.getElementById("track-name");
+        const playBtn = document.getElementById("play-btn");
+
+        if (songs.length > 0) {
+            trackName.innerText = songs[currentIdx].title;
+            audio.addEventListener('ended', nextSong);
+        } else {
+             trackName.innerText = "No Audio Files Found";
+        }
+
+        function togglePlay() {
+            if (!audio) return;
+            if (isPlaying) {
+                audio.pause();
+                playBtn.innerText = "PLAY";
+            } else {
+                audio.play().catch(e => console.log("Playback failed:", e));
+                playBtn.innerText = "STOP";
+            }
+            isPlaying = !isPlaying;
+        }
+
+        function nextSong() {
+            if (!audio) return;
+            currentIdx = (currentIdx + 1) % songs.length;
+            loadTrack();
+        }
+
+        function prevSong() {
+            if (!audio) return;
+            currentIdx = (currentIdx - 1 + songs.length) % songs.length;
+            loadTrack();
+        }
+
+        function loadTrack() {
+            audio.pause();
+            audio = new Audio(songs[currentIdx].src);
+            audio.addEventListener('ended', nextSong);
+            
+            trackName.innerText = songs[currentIdx].title;
+            
+            if (isPlaying) {
+                audio.play();
+            }
+        }
+    </script>
+</body>
+</html>
